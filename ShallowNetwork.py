@@ -6,7 +6,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # Retrieve data from CSV file (RawData.csv) 
 
-data = pd.read_csv('Project/RawData.csv')
+data = pd.read_csv('Data/RawData.xlsx')
 data = data.dropna()  # Remove rows with missing values
 
 # Extract hour from the first column (date), handling invalid dates
@@ -61,7 +61,8 @@ def layer_sizes(X, Y):
 
     n_x = X.shape[0]  # size of input layer, X.shape == (n_features, n_examples)
     n_h = 4           # we choose the size of the hidden layer to be
-    n_y = Y.shape[0]  # size of output layer
+    n_y = Y.shape[0]
+    print("this n_x "+str(n_x)+" this n_y "+str(n_y))  # size of output layer
     return (n_x, n_h, n_y)
 
 def initialize_parameters(n_x, n_h, n_y):
