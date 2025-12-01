@@ -12,9 +12,9 @@ from dnn_app_utils_v3 import *
 # ========================================================================
 # HYPERPARAMETERS - EASY TO CHANGE
 # ========================================================================
-LEARNING_RATE = 0.9                                   # Learning rate for gradient descent (OPTIMAL for this problem)
+LEARNING_RATE = 0.1                                   # Learning rate for gradient descent (OPTIMAL for this problem)
 ITERATION_TESTS = [ 500,1000,2000,5000,10000,25000, 50000, 100000 ]  # Different iteration counts to test
-LAYERS_DIMS = [7,40,40,40,40, 1]                      # Network architecture - SIMPLER & WIDER for better gradient flow
+LAYERS_DIMS = [3,40,40,40,40, 1]                      # Network architecture - REDUCED INPUT (3 features instead of 7)
 PRINT_COST = False                                     # Print cost during training (TRUE to see if it's decreasing!)
 TEST_SIZE = 0.2                                        # Train/test split ratio
 RANDOM_STATE = 42                                      # Random seed for reproducibility
@@ -22,10 +22,10 @@ RANDOM_STATE = 42                                      # Random seed for reprodu
 
 # 1 - LOAD AND PREPROCESS DATA
 print("="*70)
-print("LOADING AND PREPROCESSING DATA")
+print("LOADING AND PREPROCESSING DATA - REDUCED INPUT VERSION")
 print("="*70)
 
-data = pd.read_excel('Data/RawData.xlsx')
+data = pd.read_excel('Data/RawData - Copy.xlsx')
 data = data.dropna()  # Remove rows with missing values
 
 # Extract hour from the first column (date), handling invalid dates
@@ -74,7 +74,7 @@ n_x = X_train.shape[0]
 n_y = y_train.shape[0]
 
 print("\n" + "="*70)
-print("DATASET INFORMATION")
+print("DATASET INFORMATION - REDUCED INPUT")
 print("="*70)
 print(f"Number of training examples: m_train = {m_train}")
 print(f"Number of testing examples: m_test = {m_test}")
@@ -134,7 +134,7 @@ def L_layer_model(X, Y, layers_dims, learning_rate=0.85, num_iterations=3000, pr
 
 # 3 - RUN TESTS FOR DIFFERENT ITERATION COUNTS
 print("\n" + "="*70)
-print("RUNNING MULTIPLE TESTS")
+print("RUNNING MULTIPLE TESTS - REDUCED INPUT")
 print(f"Learning Rate: {LEARNING_RATE}")
 print(f"Architecture: {LAYERS_DIMS}")
 print(f"Number of Tests: {len(ITERATION_TESTS)}")
@@ -231,7 +231,7 @@ total_time = time.time() - total_start_time
 
 # 4 - CREATE FINAL SUMMARY TABLE AND SAVE TO EXCEL
 print("\n" + "#"*70)
-print("### FINAL SUMMARY - ALL TESTS")
+print("### FINAL SUMMARY - ALL TESTS (REDUCED INPUT)")
 print("#"*70)
 
 results_df = pd.DataFrame(all_results)
@@ -246,7 +246,7 @@ results_df = results_df[['Iterations',
 print("\n" + results_df.to_string(index=False))
 
 # Save to Excel with formatting
-output_filename = f'DeepNN_Results_LR{LEARNING_RATE}_Arch{"_".join(map(str, LAYERS_DIMS))}.xlsx'
+output_filename = f'DeepNN_ReducedInput_Results_LR{LEARNING_RATE}_Arch{"_".join(map(str, LAYERS_DIMS))}.xlsx'
 
 # Create Excel writer with xlsxwriter engine for formatting
 with pd.ExcelWriter(output_filename, engine='xlsxwriter') as writer:
@@ -288,11 +288,13 @@ with pd.ExcelWriter(output_filename, engine='xlsxwriter') as writer:
 
     # Add a summary sheet
     summary_df = pd.DataFrame({
-        'Parameter': ['Learning Rate', 'Architecture', 'Test Size', 'Random State',
+        'Parameter': ['Data Source', 'Learning Rate', 'Architecture', 'Number of Features',
+                      'Test Size', 'Random State',
                       'Number of Tests', 'Total Computation Time (sec)', 'Total Computation Time (min)',
                       'Best Test R²', 'Best Test R² at Iterations',
                       'Best Train R²', 'Best Train R² at Iterations'],
-        'Value': [LEARNING_RATE, str(LAYERS_DIMS), TEST_SIZE, RANDOM_STATE,
+        'Value': ['RawData - Copy.xlsx (Reduced Input)', LEARNING_RATE, str(LAYERS_DIMS), LAYERS_DIMS[0],
+                  TEST_SIZE, RANDOM_STATE,
                   len(ITERATION_TESTS), f'{total_time:.2f}', f'{total_time/60:.2f}',
                   f'{results_df["Test_R2"].max():.6f}', results_df.loc[results_df["Test_R2"].idxmax(), "Iterations"],
                   f'{results_df["Train_R2"].max():.6f}', results_df.loc[results_df["Train_R2"].idxmax(), "Iterations"]]
@@ -308,7 +310,7 @@ with pd.ExcelWriter(output_filename, engine='xlsxwriter') as writer:
 print(f"\n✓ Results saved to Excel: {output_filename}")
 print(f"  → Sheet 1: 'Results' - All test results with {len(results_df)} rows")
 print(f"  → Sheet 2: 'Summary' - Configuration and best results")
-print(f"  → The Excel will automatically adapt to any number of iterations you add!")
+print(f"  → Dataset: RawData - Copy.xlsx (REDUCED INPUT - 3 features)")
 
 # 5 - GENERATE COMPARISON PLOTS
 print("\nGenerating comparison plots...")
@@ -320,7 +322,7 @@ axes[0, 0].plot(results_df['Iterations'], results_df['Test_R2'], 'o-', label='Te
 axes[0, 0].plot(results_df['Iterations'], results_df['Train_R2'], 's-', label='Train R²', color='orange', linewidth=2, markersize=8)
 axes[0, 0].set_xlabel('Number of Iterations', fontsize=12)
 axes[0, 0].set_ylabel('R²', fontsize=12)
-axes[0, 0].set_title('R² Score vs Iterations', fontsize=14, fontweight='bold')
+axes[0, 0].set_title('R² Score vs Iterations (Reduced Input)', fontsize=14, fontweight='bold')
 axes[0, 0].legend(fontsize=10)
 axes[0, 0].grid(True, alpha=0.3)
 axes[0, 0].set_xscale('log')
@@ -330,7 +332,7 @@ axes[0, 1].plot(results_df['Iterations'], results_df['Test_MAE'], 'o-', label='T
 axes[0, 1].plot(results_df['Iterations'], results_df['Train_MAE'], 's-', label='Train MAE', color='orange', linewidth=2, markersize=8)
 axes[0, 1].set_xlabel('Number of Iterations', fontsize=12)
 axes[0, 1].set_ylabel('MAE', fontsize=12)
-axes[0, 1].set_title('MAE vs Iterations', fontsize=14, fontweight='bold')
+axes[0, 1].set_title('MAE vs Iterations (Reduced Input)', fontsize=14, fontweight='bold')
 axes[0, 1].legend(fontsize=10)
 axes[0, 1].grid(True, alpha=0.3)
 axes[0, 1].set_xscale('log')
@@ -340,7 +342,7 @@ axes[1, 0].plot(results_df['Iterations'], results_df['Test_MSE'], 'o-', label='T
 axes[1, 0].plot(results_df['Iterations'], results_df['Train_MSE'], 's-', label='Train MSE', color='orange', linewidth=2, markersize=8)
 axes[1, 0].set_xlabel('Number of Iterations', fontsize=12)
 axes[1, 0].set_ylabel('MSE', fontsize=12)
-axes[1, 0].set_title('MSE vs Iterations', fontsize=14, fontweight='bold')
+axes[1, 0].set_title('MSE vs Iterations (Reduced Input)', fontsize=14, fontweight='bold')
 axes[1, 0].legend(fontsize=10)
 axes[1, 0].grid(True, alpha=0.3)
 axes[1, 0].set_xscale('log')
@@ -349,19 +351,19 @@ axes[1, 0].set_xscale('log')
 axes[1, 1].plot(results_df['Iterations'], results_df['Comput_Time_sec']/60, 'o-', color='green', linewidth=2, markersize=8)
 axes[1, 1].set_xlabel('Number of Iterations', fontsize=12)
 axes[1, 1].set_ylabel('Computation Time (minutes)', fontsize=12)
-axes[1, 1].set_title('Computation Time vs Iterations', fontsize=14, fontweight='bold')
+axes[1, 1].set_title('Computation Time vs Iterations (Reduced Input)', fontsize=14, fontweight='bold')
 axes[1, 1].grid(True, alpha=0.3)
 axes[1, 1].set_xscale('log')
 
 plt.tight_layout()
-plot_filename = f'DeepNN_Results_LR{LEARNING_RATE}.png'
+plot_filename = f'DeepNN_ReducedInput_Results_LR{LEARNING_RATE}.png'
 plt.savefig(plot_filename, dpi=300, bbox_inches='tight')
 print(f"✓ Plots saved to: {plot_filename}")
 plt.show()
 
 # 6 - FINAL STATISTICS
 print("\n" + "#"*70)
-print("### FINAL STATISTICS")
+print("### FINAL STATISTICS (REDUCED INPUT)")
 print("#"*70)
 best_test_idx = results_df['Test_R2'].idxmax()
 best_train_idx = results_df['Train_R2'].idxmax()
@@ -379,5 +381,5 @@ print(f"\n⏱️  Total Computation Time: {total_time:.2f}s ({total_time/60:.2f}
 print(f"   → Average per test: {total_time/len(ITERATION_TESTS):.2f}s")
 
 print("\n" + "#"*70)
-print("### ALL TESTS COMPLETE!")
+print("### ALL TESTS COMPLETE! (REDUCED INPUT - 3 FEATURES)")
 print("#"*70)
